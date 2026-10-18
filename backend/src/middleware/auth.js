@@ -47,10 +47,11 @@ export async function autenticar(req, res, next) {
     req.accessToken = token;
 
     next();
+
   } catch (error) {
     console.error("Error de autenticación:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       mensaje: "Error al validar la sesión"
     });
   }
