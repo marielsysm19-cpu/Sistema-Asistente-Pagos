@@ -1,0 +1,28 @@
+{
+  "project": "Sistema Asistente de Pagos",
+  "folders": [
+    "frontend",
+    "backend",
+    "bd"
+  ],
+  "frontend": {
+    "mode": "mock/localStorage",
+    "roles": [
+      "ASISTENTE",
+      "GERENTE"
+    ],
+    "views": [
+      "Inicio",
+      "Pagos"
+    ],
+    "features": [
+      "Vista mensual",
+      "Registrar obligación",
+      "Editar vencimiento",
+      "Registrar pago",
+      "Adjuntar comprobante",
+      "Revisar comprobante",
+      "Estados Pendiente/Pagado/Vencido"
+    ]
+  }
+}

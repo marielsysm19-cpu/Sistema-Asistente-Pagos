@@ -1,0 +1,19 @@
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Node / backend future
+node_modules/
+.env
+.env.*
+dist/
+coverage/
+
+# Logs
+*.log
+
+# Uploads locales del backend (cuando se implemente)
+backend/uploads/*
+!backend/uploads/.gitkeep

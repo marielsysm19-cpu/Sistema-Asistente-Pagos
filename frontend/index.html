@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sistema Asistente de Pagos</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">SAP</div>
+        <div>
+          <strong>Asistente de Pagos</strong>
+          <span>Control mensual</span>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <button class="nav-item active" data-view="inicio">
+          <span class="nav-icon">⌂</span>
+          <span>Inicio</span>
+        </button>
+        <button class="nav-item" data-view="pagos">
+          <span class="nav-icon">▤</span>
+          <span>Pagos</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-note">
+        <small>PMV · Sprint 1</small>
+        <span>Interfaz simple y enfocada</span>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Sistema Asistente de Pagos</p>
+          <h1 id="pageTitle">Resumen del mes</h1>
+        </div>
+
+        <div class="profile">
+          <div class="profile-text">
+            <strong id="profileName">Usuario Demo</strong>
+            <span id="profileRole">Asistente</span>
+          </div>
+          <button id="changeRoleBtn" class="avatar" type="button" title="Cambiar perfil de demostración">UD</button>
+        </div>
+      </header>
+
+      <section id="inicioView" class="view active">
+        <div class="hero">
+          <div>
+            <p class="eyebrow">Mes actual</p>
+            <h2 id="heroMonth">Octubre 2026</h2>
+            <p id="heroCopy">Consulta rápidamente qué pagos están pendientes, pagados o vencidos.</p>
+          </div>
+          <button id="goPaymentsBtn" class="btn btn-primary">Ver pagos del mes</button>
+        </div>
+
+        <div class="summary-grid">
+          <article class="summary-card">
+            <span>Total del mes</span>
+            <strong id="summaryTotal">S/ 0.00</strong>
+          </article>
+          <article class="summary-card">
+            <span>Pagado</span>
+            <strong id="summaryPaid">S/ 0.00</strong>
+          </article>
+          <article class="summary-card">
+            <span>Pendiente</span>
+            <strong id="summaryPending">S/ 0.00</strong>
+          </article>
+          <article class="summary-card">
+            <span>Vencido</span>
+            <strong id="summaryOverdue">S/ 0.00</strong>
+          </article>
+        </div>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Prioridad</p>
+              <h3>Próximos pagos</h3>
+            </div>
+          </div>
+          <div id="upcomingList" class="simple-list"></div>
+        </section>
+      </section>
+
+      <section id="pagosView" class="view">
+        <div class="payments-header">
+          <div class="month-navigation">
+            <button id="prevMonthBtn" class="icon-btn" type="button" aria-label="Mes anterior">←</button>
+            <div class="month-label">
+              <span>Pagos del mes</span>
+              <strong id="monthTitle">Octubre 2026</strong>
+            </div>
+            <button id="nextMonthBtn" class="icon-btn" type="button" aria-label="Mes siguiente">→</button>
+            <button id="todayMonthBtn" class="btn btn-secondary btn-small" type="button">Mes actual</button>
+          </div>
+
+          <button id="newPaymentBtn" class="btn btn-primary assistant-only" type="button">+ Nuevo pago</button>
+        </div>
+
+        <div class="summary-grid compact">
+          <article class="summary-card">
+            <span>Total</span>
+            <strong id="paymentsTotal">S/ 0.00</strong>
+          </article>
+          <article class="summary-card">
+            <span>Pagado</span>
+            <strong id="paymentsPaid">S/ 0.00</strong>
+          </article>
+          <article class="summary-card">
+            <span>Pendiente</span>
+            <strong id="paymentsPending">S/ 0.00</strong>
+          </article>
+          <article class="summary-card">
+            <span>Vencido</span>
+            <strong id="paymentsOverdue">S/ 0.00</strong>
+          </article>
+        </div>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Vista mensual</p>
+              <h3>Registros de pago</h3>
+              <p class="panel-help">Sin filtros avanzados. Todo lo importante del mes en una sola vista.</p>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table class="payments-table">
+              <thead>
+                <tr>
+                  <th>Proveedor / entidad</th>
+                  <th>Concepto</th>
+                  <th>Categoría</th>
+                  <th>Vencimiento</th>
+                  <th>Monto</th>
+                  <th>Estado</th>
+                  <th>Comprobante</th>
+                  <th id="actionsHeader">Acción</th>
+                </tr>
+              </thead>
+              <tbody id="paymentsBody"></tbody>
+            </table>
+          </div>
+
+          <div id="emptyState" class="empty-state hidden">
+            <strong>No hay pagos registrados para este mes</strong>
+            <span>Cuando exista una obligación con vencimiento en este mes aparecerá aquí.</span>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <!-- MODAL PERFIL DEMO -->
+  <div id="roleModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="roleModalTitle">
+    <div class="modal-card modal-small">
+      <div class="modal-header">
+        <div>
+          <p class="eyebrow">Modo de demostración</p>
+          <h2 id="roleModalTitle">¿Con qué perfil deseas entrar?</h2>
+        </div>
+      </div>
+      <p class="muted">Este selector se reemplazará por la autenticación real del backend.</p>
+      <div class="role-options">
+        <button class="role-card" data-role="ASISTENTE">
+          <strong>Asistente</strong>
+          <span>Registra obligaciones, cambia fechas y adjunta comprobantes.</span>
+        </button>
+        <button class="role-card" data-role="GERENTE">
+          <strong>Gerente</strong>
+          <span>Consulta pagos, estados y comprobantes.</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL NUEVA OBLIGACIÓN -->
+  <div id="newPaymentModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="newPaymentTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <p class="eyebrow">Nueva obligación</p>
+          <h2 id="newPaymentTitle">Registrar pago pendiente</h2>
+        </div>
+        <button class="icon-btn close-modal" data-target="newPaymentModal" type="button">×</button>
+      </div>
+
+      <form id="newPaymentForm" class="form-grid">
+        <label>
+          <span>Proveedor o entidad *</span>
+          <input id="providerInput" name="provider" type="text" required placeholder="Ej. Movistar" />
+        </label>
+
+        <label>
+          <span>Concepto *</span>
+          <input id="conceptInput" name="concept" type="text" required placeholder="Ej. Internet oficina" />
+        </label>
+
+        <label>
+          <span>Categoría *</span>
+          <select id="categoryInput" name="category" required>
+            <option value="">Seleccionar</option>
+            <option>Servicios</option>
+            <option>Impuestos</option>
+            <option>Proveedores</option>
+            <option>Préstamos</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Monto (S/) *</span>
+          <input id="amountInput" name="amount" type="number" min="0.01" step="0.01" required placeholder="0.00" />
+        </label>
+
+        <label class="full">
+          <span>Fecha de vencimiento *</span>
+          <input id="dueDateInput" name="dueDate" type="date" required />
+        </label>
+
+        <div class="form-actions full">
+          <button type="button" class="btn btn-secondary close-modal" data-target="newPaymentModal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar obligación</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL REGISTRAR PAGO -->
+  <div id="registerPaymentModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="registerPaymentTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <p class="eyebrow">Pago realizado externamente</p>
+          <h2 id="registerPaymentTitle">Registrar pago y comprobante</h2>
+        </div>
+        <button class="icon-btn close-modal" data-target="registerPaymentModal" type="button">×</button>
+      </div>
+
+      <div id="selectedPaymentInfo" class="selected-payment"></div>
+
+      <form id="registerPaymentForm" class="form-grid">
+        <input id="paymentIdInput" type="hidden" />
+
+        <label>
+          <span>Fecha de pago *</span>
+          <input id="paidDateInput" type="date" required />
+        </label>
+
+        <label>
+          <span>Comprobante *</span>
+          <input id="receiptInput" type="file" accept=".pdf,.jpg,.jpeg,.png" required />
+          <small>PDF, JPG, JPEG o PNG · máximo 1.5 MB en este prototipo.</small>
+        </label>
+
+        <div class="form-actions full">
+          <button type="button" class="btn btn-secondary close-modal" data-target="registerPaymentModal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar pago</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL COMPROBANTE -->
+  <div id="receiptModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="receiptTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <p class="eyebrow">Comprobante</p>
+          <h2 id="receiptTitle">Detalle del comprobante</h2>
+        </div>
+        <button class="icon-btn close-modal" data-target="receiptModal" type="button">×</button>
+      </div>
+      <div id="receiptContent"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden" role="status"></div>
+
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
