@@ -4,16 +4,19 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Node / backend future
+# Node / backend
 node_modules/
 .env
 .env.*
+!.env.example
+!backend/.env.example
 dist/
 coverage/
+backend/.env
 
 # Logs
 *.log
 
-# Uploads locales del backend (cuando se implemente)
+# Uploads locales del backend
 backend/uploads/*
 !backend/uploads/.gitkeep
