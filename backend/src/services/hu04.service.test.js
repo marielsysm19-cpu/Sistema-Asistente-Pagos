@@ -9,11 +9,40 @@ import {
 } from "./hu04.service.js";
 
 
+const HOY = "2026-10-18";
+
+const PDF_REAL = Buffer.from(
+  "%PDF-1.4\narchivo de prueba"
+);
+
+const JPEG_REAL = Buffer.from([
+  0xff,
+  0xd8,
+  0xff,
+  0xe0,
+  0x00
+]);
+
+const PNG_REAL = Buffer.from([
+  0x89,
+  0x50,
+  0x4e,
+  0x47,
+  0x0d,
+  0x0a,
+  0x1a,
+  0x0a
+]);
+
+
 test(
   "Debe aceptar una fecha de pago válida",
   () => {
     assert.equal(
-      fechaPagoValida("2026-10-18"),
+      fechaPagoValida(
+        "2026-10-18",
+        HOY
+      ),
       true
     );
   }
@@ -24,7 +53,10 @@ test(
   "Debe rechazar una fecha inexistente",
   () => {
     assert.equal(
-      fechaPagoValida("2026-02-31"),
+      fechaPagoValida(
+        "2026-02-31",
+        HOY
+      ),
       false
     );
   }
@@ -35,7 +67,10 @@ test(
   "Debe rechazar una fecha con formato incorrecto",
   () => {
     assert.equal(
-      fechaPagoValida("18/10/2026"),
+      fechaPagoValida(
+        "18/10/2026",
+        HOY
+      ),
       false
     );
   }
@@ -43,11 +78,26 @@ test(
 
 
 test(
-  "Debe aceptar un comprobante PDF",
+  "Debe rechazar una fecha de pago futura",
+  () => {
+    assert.equal(
+      fechaPagoValida(
+        "2099-01-01",
+        HOY
+      ),
+      false
+    );
+  }
+);
+
+
+test(
+  "Debe aceptar un comprobante PDF real",
   () => {
     const archivo = {
       mimetype: "application/pdf",
-      size: 500000
+      size: PDF_REAL.length,
+      buffer: PDF_REAL
     };
 
     assert.equal(
@@ -59,11 +109,12 @@ test(
 
 
 test(
-  "Debe aceptar una imagen JPEG",
+  "Debe aceptar una imagen JPEG real",
   () => {
     const archivo = {
       mimetype: "image/jpeg",
-      size: 500000
+      size: JPEG_REAL.length,
+      buffer: JPEG_REAL
     };
 
     assert.equal(
@@ -75,11 +126,12 @@ test(
 
 
 test(
-  "Debe aceptar una imagen PNG",
+  "Debe aceptar una imagen PNG real",
   () => {
     const archivo = {
       mimetype: "image/png",
-      size: 500000
+      size: PNG_REAL.length,
+      buffer: PNG_REAL
     };
 
     assert.equal(
@@ -94,8 +146,9 @@ test(
   "Debe rechazar formatos no permitidos",
   () => {
     const archivo = {
-      mimetype: "application/exe",
-      size: 1000
+      mimetype: "text/plain",
+      size: 10,
+      buffer: Buffer.from("texto")
     };
 
     assert.equal(
@@ -111,7 +164,8 @@ test(
   () => {
     const archivo = {
       mimetype: "application/pdf",
-      size: 6 * 1024 * 1024
+      size: 6 * 1024 * 1024,
+      buffer: PDF_REAL
     };
 
     assert.equal(
@@ -127,6 +181,44 @@ test(
   () => {
     assert.equal(
       validarComprobante(null).valido,
+      false
+    );
+  }
+);
+
+
+test(
+  "Debe rechazar un archivo vacío",
+  () => {
+    const archivo = {
+      mimetype: "application/pdf",
+      size: 0,
+      buffer: Buffer.alloc(0)
+    };
+
+    assert.equal(
+      validarComprobante(archivo).valido,
+      false
+    );
+  }
+);
+
+
+test(
+  "Debe rechazar un TXT disfrazado de PDF",
+  () => {
+    const falsoPdf = Buffer.from(
+      "Este archivo realmente es texto"
+    );
+
+    const archivo = {
+      mimetype: "application/pdf",
+      size: falsoPdf.length,
+      buffer: falsoPdf
+    };
+
+    assert.equal(
+      validarComprobante(archivo).valido,
       false
     );
   }
