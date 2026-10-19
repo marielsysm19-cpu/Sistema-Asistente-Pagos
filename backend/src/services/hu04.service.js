@@ -7,7 +7,27 @@ export const TIPOS_COMPROBANTE_PERMITIDOS = [
 export const TAMANO_MAXIMO_COMPROBANTE =
   5 * 1024 * 1024;
 
-export function fechaPagoValida(fechaPago) {
+
+function obtenerFechaActualISO() {
+  const ahora = new Date();
+
+  const anio = ahora.getFullYear();
+  const mes = String(
+    ahora.getMonth() + 1
+  ).padStart(2, "0");
+
+  const dia = String(
+    ahora.getDate()
+  ).padStart(2, "0");
+
+  return `${anio}-${mes}-${dia}`;
+}
+
+
+export function fechaPagoValida(
+  fechaPago,
+  fechaActual = obtenerFechaActualISO()
+) {
   if (
     typeof fechaPago !== "string" ||
     !/^\d{4}-\d{2}-\d{2}$/.test(fechaPago)
@@ -22,12 +42,24 @@ export function fechaPagoValida(fechaPago) {
     Date.UTC(anio, mes - 1, dia)
   );
 
-  return (
+  const existeEnCalendario =
     fecha.getUTCFullYear() === anio &&
     fecha.getUTCMonth() === mes - 1 &&
-    fecha.getUTCDate() === dia
-  );
+    fecha.getUTCDate() === dia;
+
+  if (!existeEnCalendario) {
+    return false;
+  }
+
+  // No se puede registrar hoy
+  // un pago realizado en el futuro.
+  if (fechaPago > fechaActual) {
+    return false;
+  }
+
+  return true;
 }
+
 
 export function sanitizarNombreArchivo(nombre) {
   if (!nombre) {
@@ -39,6 +71,7 @@ export function sanitizarNombreArchivo(nombre) {
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-zA-Z0-9._-]/g, "_");
 }
+
 
 export function construirStoragePath(
   usuarioId,
@@ -58,11 +91,67 @@ export function construirStoragePath(
   return `${usuarioId}/${obligacionId}/${timestamp}-${nombreSeguro}`;
 }
 
+
+export function firmaComprobanteValida(archivo) {
+  if (
+    !archivo ||
+    !Buffer.isBuffer(archivo.buffer)
+  ) {
+    return false;
+  }
+
+  const buffer = archivo.buffer;
+
+  if (archivo.mimetype === "application/pdf") {
+    return (
+      buffer.length >= 5 &&
+      buffer
+        .subarray(0, 5)
+        .toString("ascii") === "%PDF-"
+    );
+  }
+
+  if (archivo.mimetype === "image/jpeg") {
+    return (
+      buffer.length >= 3 &&
+      buffer[0] === 0xff &&
+      buffer[1] === 0xd8 &&
+      buffer[2] === 0xff
+    );
+  }
+
+  if (archivo.mimetype === "image/png") {
+    const firmaPNG = [
+      0x89,
+      0x50,
+      0x4e,
+      0x47,
+      0x0d,
+      0x0a,
+      0x1a,
+      0x0a
+    ];
+
+    if (buffer.length < firmaPNG.length) {
+      return false;
+    }
+
+    return firmaPNG.every(
+      (byte, indice) =>
+        buffer[indice] === byte
+    );
+  }
+
+  return false;
+}
+
+
 export function validarComprobante(archivo) {
   if (!archivo) {
     return {
       valido: false,
-      mensaje: "El comprobante es obligatorio"
+      mensaje:
+        "El comprobante es obligatorio"
     };
   }
 
@@ -79,6 +168,17 @@ export function validarComprobante(archivo) {
   }
 
   if (
+    !Number.isFinite(archivo.size) ||
+    archivo.size <= 0
+  ) {
+    return {
+      valido: false,
+      mensaje:
+        "El comprobante está vacío o no es válido"
+    };
+  }
+
+  if (
     archivo.size >
     TAMANO_MAXIMO_COMPROBANTE
   ) {
@@ -86,6 +186,14 @@ export function validarComprobante(archivo) {
       valido: false,
       mensaje:
         "El comprobante supera el tamaño máximo de 5 MB"
+    };
+  }
+
+  if (!firmaComprobanteValida(archivo)) {
+    return {
+      valido: false,
+      mensaje:
+        "El contenido del archivo no corresponde al formato indicado"
     };
   }
 
