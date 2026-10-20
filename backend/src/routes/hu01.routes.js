@@ -5,7 +5,6 @@ import { permitirRoles } from "../middleware/role.js";
 
 const router = Router();
 
-// Crear obligación solo como ASISTENTE.
 router.post(
   "/",
   autenticar,

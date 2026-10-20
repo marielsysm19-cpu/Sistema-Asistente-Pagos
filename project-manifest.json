@@ -6,7 +6,7 @@
     "bd"
   ],
   "frontend": {
-    "mode": "mock/localStorage",
+    "mode": "API real / Supabase",
     "roles": [
       "ASISTENTE",
       "GERENTE"
@@ -18,7 +18,6 @@
     "features": [
       "Vista mensual",
       "Registrar obligación",
-      "Editar vencimiento",
       "Registrar pago",
       "Adjuntar comprobante",
       "Revisar comprobante",

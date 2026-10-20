@@ -732,3 +732,191 @@ button {
     flex-wrap: wrap;
   }
 }
+
+/* =====================================================
+   MEDIOS DE PAGO Y COMPROBANTES
+   ===================================================== */
+
+.payment-method-help {
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-soft);
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.receipt-details {
+  display: grid;
+  gap: 6px;
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--surface-soft);
+}
+
+.receipt-details span {
+  margin: 0;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.receipt-details b {
+  font-weight: 700;
+}
+
+/* =====================================================
+   CAMPOS ESPECIALES: PRÉSTAMOS / IMPUESTOS
+   ===================================================== */
+.category-fields {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  background: var(--surface-soft);
+}
+
+.category-fields-title {
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.field-help {
+  margin: 0 0 14px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.nested-grid {
+  margin-top: 8px;
+}
+
+.calculation-preview {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: white;
+  border: 1px dashed var(--border);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.amount-cell strong {
+  display: block;
+}
+
+.amount-note {
+  display: block;
+  margin-top: 4px;
+  max-width: 210px;
+  font-size: 10px;
+  line-height: 1.35;
+  color: var(--muted);
+}
+
+.overdue-text {
+  color: #a62828;
+}
+
+/* =====================================================
+   VERIFICACIÓN DE COMPROBANTES
+   ===================================================== */
+.verification-column,
+.verification-cell {
+  padding-left: 40px !important;
+  min-width: 145px;
+}
+
+.verification-badge {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  min-width: 96px;
+  margin: 0 !important;
+  padding: 7px 12px;
+  border-radius: 5px;
+  border: 1px solid transparent;
+  font-size: 10px !important;
+  font-weight: 750;
+  line-height: 1.1;
+  letter-spacing: .01em;
+}
+
+.verification-pending {
+  background: #fff8e8;
+  border-color: #ead8a3;
+  color: #725200 !important;
+}
+
+.verification-approved {
+  background: #edf8f2;
+  border-color: #bfe2cd;
+  color: #17633a !important;
+}
+
+.verification-rejected {
+  background: #fff0f0;
+  border-color: #efc2c2;
+  color: #972929 !important;
+}
+
+.review-state {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 9px;
+  border-radius: 7px;
+  border: 1px solid #d8dee9;
+  background: #f6f8fb;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.receipt-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.receipt-title-row .verification-badge {
+  margin-top: 0 !important;
+}
+
+.verification-actions {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.verification-actions label span {
+  margin: 0 0 6px;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.verification-actions textarea {
+  width: 100%;
+  border: 1px solid #d7dde7;
+  border-radius: 10px;
+  padding: 10px 12px;
+  resize: vertical;
+  font: inherit;
+}
+
+.btn-danger {
+  border: 1px solid #d9a4a4;
+  background: #fff3f3;
+  color: #9a2525;
+}
+
+.rejection-note {
+  margin-top: 10px !important;
+  padding: 9px 11px;
+  border-radius: 9px;
+  background: #fff3f3;
+  color: #8b2525 !important;
+  font-size: 12px !important;
+}
