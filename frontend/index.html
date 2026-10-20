@@ -332,7 +332,7 @@
             class="btn btn-primary assistant-only"
             type="button"
           >
-            + Nuevo pago
+            + Nueva obligación
           </button>
 
         </div>
@@ -456,6 +456,10 @@
 
                   <th>
                     Comprobante
+                  </th>
+
+                  <th class="verification-column">
+                    Verificación
                   </th>
 
                   <th id="actionsHeader">
@@ -616,7 +620,7 @@
           </p>
 
           <h2 id="newPaymentTitle">
-            Registrar pago pendiente
+            Registrar obligación
           </h2>
 
         </div>
@@ -709,9 +713,9 @@
         </label>
 
 
-        <label>
+        <label id="amountField">
 
-          <span>
+          <span id="amountLabel">
             Monto (S/) *
           </span>
 
@@ -720,6 +724,7 @@
             name="amount"
             type="number"
             min="0.01"
+            max="9999999999.99"
             step="0.01"
             required
             placeholder="0.00"
@@ -728,9 +733,9 @@
         </label>
 
 
-        <label class="full">
+        <label id="dueDateField" class="full">
 
-          <span>
+          <span id="dueDateLabel">
             Fecha de vencimiento *
           </span>
 
@@ -742,6 +747,95 @@
           />
 
         </label>
+
+        <div id="loanFields" class="category-fields full hidden">
+          <div class="category-fields-title">Datos del préstamo</div>
+          <p class="muted field-help">El sistema puede generar un pago único o un cronograma de cuotas. La mora diaria se toma del contrato y aumenta automáticamente mientras la cuota esté vencida.</p>
+
+          <div class="form-grid nested-grid">
+            <label>
+              <span>Modalidad *</span>
+              <select id="loanModeInput">
+                <option value="UNICO">Un solo pago</option>
+                <option value="CUOTAS">Pago por cuotas</option>
+              </select>
+            </label>
+
+            <label>
+              <span>Capital del préstamo (S/) *</span>
+              <input id="loanCapitalInput" type="number" min="0.01" max="9999999999.99" step="0.01" placeholder="10000.00" />
+            </label>
+
+            <label>
+              <span>¿Tiene interés?</span>
+              <select id="loanHasInterestInput">
+                <option value="NO">No</option>
+                <option value="SI">Sí</option>
+              </select>
+            </label>
+
+            <label id="loanInterestRateField" class="hidden">
+              <span id="loanInterestRateLabel">Interés total pactado (%) *</span>
+              <input id="loanInterestRateInput" type="number" min="0" max="100" step="0.0001" value="0" />
+            </label>
+
+            <label id="loanInstallmentsField" class="hidden">
+              <span>Número de cuotas *</span>
+              <input id="loanInstallmentsInput" type="number" min="2" max="120" step="1" value="12" />
+            </label>
+
+            <label id="loanFrequencyField" class="hidden">
+              <span>Periodicidad de pago *</span>
+              <select id="loanFrequencyInput">
+                <option value="MENSUAL">Mensual</option>
+                <option value="QUINCENAL">Quincenal</option>
+                <option value="SEMANAL">Semanal</option>
+              </select>
+            </label>
+
+            <label>
+              <span>¿Aplica mora?</span>
+              <select id="loanHasLateFeeInput">
+                <option value="NO">No</option>
+                <option value="SI">Sí</option>
+              </select>
+            </label>
+
+            <label id="loanLateFeeRateField" class="hidden">
+              <span>Tasa de mora diaria (%) *</span>
+              <input id="loanLateFeeRateInput" type="number" min="0.000001" max="10" step="0.000001" value="0.10" />
+            </label>
+          </div>
+
+          <div id="loanPreview" class="calculation-preview"></div>
+        </div>
+
+        <div id="taxFields" class="category-fields full hidden">
+          <div class="category-fields-title">Datos del impuesto</div>
+          <p class="muted field-help">El sistema no calcula el impuesto. Registra el monto comunicado por SUNAT, SAT u otra entidad y cualquier recargo informado.</p>
+
+          <div class="form-grid nested-grid">
+            <label>
+              <span>Tipo de impuesto *</span>
+              <input id="taxTypeInput" type="text" maxlength="120" placeholder="Ej. Impuesto a la Renta" />
+            </label>
+
+            <label>
+              <span>Periodo tributario *</span>
+              <input id="taxPeriodInput" type="text" maxlength="80" placeholder="Ej. 2025 o 09/2026" />
+            </label>
+
+            <label>
+              <span>N.º de orden / código</span>
+              <input id="taxOrderInput" type="text" maxlength="120" placeholder="Opcional" />
+            </label>
+
+            <label>
+              <span>Recargo informado (S/)</span>
+              <input id="taxSurchargeInput" type="number" min="0" max="9999999999.99" step="0.01" value="0" />
+            </label>
+          </div>
+        </div>
 
 
         <div class="form-actions full">
@@ -771,6 +865,7 @@
   </div>
 
 
+
   <!-- ===================================================== -->
   <!-- MODAL REGISTRAR PAGO -->
   <!-- ===================================================== -->
@@ -790,7 +885,7 @@
         <div>
 
           <p class="eyebrow">
-            Pago realizado externamente
+            Registro de pago
           </p>
 
           <h2 id="registerPaymentTitle">
@@ -823,49 +918,102 @@
         class="form-grid"
       >
 
-        <input
-          id="paymentIdInput"
-          type="hidden"
-        />
-
+        <input id="paymentIdInput" type="hidden" />
 
         <label>
-
-          <span>
-            Fecha de pago *
-          </span>
-
-          <input
-            id="paidDateInput"
-            type="date"
-            required
-          />
-
+          <span>Método de pago *</span>
+          <select id="paymentMethodInput" required>
+            <option value="">Seleccionar</option>
+            <option value="YAPE">Yape</option>
+            <option value="TARJETA">Tarjeta</option>
+            <option value="TRANSFERENCIA">Transferencia bancaria</option>
+            <option value="EFECTIVO">Efectivo</option>
+            <option value="OTRO">Otro</option>
+          </select>
         </label>
 
+        <label>
+          <span>Fecha de pago *</span>
+          <input id="paidDateInput" type="date" required />
+        </label>
 
         <label>
+          <span>Monto del comprobante (S/) *</span>
+          <input id="paidAmountInput" type="number" min="0.01" max="9999999999.99" step="0.01" required />
+          <small>Debe coincidir con el total calculado para la fecha de pago.</small>
+        </label>
 
-          <span>
-            Comprobante *
-          </span>
+        <label class="full">
+          <span>Nombre del pagador *</span>
+          <input
+            id="payerNameInput"
+            type="text"
+            maxlength="160"
+            required
+            placeholder="Nombre de quien realizó el pago"
+          />
+        </label>
 
+        <label id="operationCodeField" class="full hidden">
+          <span id="operationCodeLabel">N.º / código de operación *</span>
+          <input
+            id="operationCodeInput"
+            type="text"
+            maxlength="30"
+            placeholder="Ej. 34758141"
+          />
+          <small id="operationCodeHint"></small>
+        </label>
+
+        <label id="cardBrandField" class="hidden">
+          <span>Tarjeta *</span>
+          <select id="cardBrandInput">
+            <option value="">Seleccionar</option>
+            <option value="VISA">Visa</option>
+            <option value="MASTERCARD">Mastercard</option>
+            <option value="AMEX">American Express</option>
+            <option value="OTRA">Otra</option>
+          </select>
+        </label>
+
+        <label id="cardLast4Field" class="hidden">
+          <span>Últimos 4 dígitos *</span>
+          <input
+            id="cardLast4Input"
+            type="text"
+            inputmode="numeric"
+            maxlength="4"
+            pattern="[0-9]{4}"
+            placeholder="1234"
+          />
+        </label>
+
+        <label id="bankOriginField" class="full hidden">
+          <span>Banco de origen *</span>
+          <input
+            id="bankOriginInput"
+            type="text"
+            maxlength="120"
+            placeholder="Ej. BCP"
+          />
+        </label>
+
+        <div id="paymentMethodHelp" class="payment-method-help full hidden"></div>
+
+        <label class="full">
+          <span>Comprobante *</span>
           <input
             id="receiptInput"
             type="file"
             accept=".pdf,.jpg,.jpeg,.png"
             required
           />
-
           <small>
-            PDF, JPG, JPEG o PNG · máximo 1.5 MB en este prototipo.
+            Adjunta la captura o comprobante emitido por el medio de pago. PDF, JPG, JPEG o PNG · máximo 5 MB.
           </small>
-
         </label>
 
-
         <div class="form-actions full">
-
           <button
             type="button"
             class="btn btn-secondary close-modal"
@@ -873,15 +1021,7 @@
           >
             Cancelar
           </button>
-
-
-          <button
-            type="submit"
-            class="btn btn-primary"
-          >
-            Guardar pago
-          </button>
-
+          <button type="submit" class="btn btn-primary">Registrar pago</button>
         </div>
 
       </form>

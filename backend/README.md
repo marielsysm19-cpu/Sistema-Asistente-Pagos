@@ -1,180 +1,54 @@
-# Backend — Contrato esperado
+# Backend
 
-Esta carpeta está preparada para que el equipo implemente el backend sin cambiar el diseño del frontend.
+API REST del Sistema Asistente de Pagos.
 
-## Recomendación
+Base local:
 
-Mantener una API REST sencilla.
-
-Base sugerida:
-`http://localhost:3000/api`
-
-## Endpoints mínimos
-
-### Autenticación / sesión
-
-`POST /api/auth/login`
-
-Debe devolver el usuario autenticado y su rol:
-- `GERENTE`
-- `ASISTENTE`
-
-La autorización real debe verificarse en backend.
-
----
-
-### Listar pagos del mes
-
-`GET /api/pagos?year=2026&month=10`
-
-Respuesta sugerida:
-
-```json
-[
-  {
-    "id": "uuid",
-    "provider": "Movistar",
-    "concept": "Internet oficina",
-    "category": "Servicios",
-    "amount": 150,
-    "dueDate": "2026-10-22",
-    "paidDate": null,
-    "status": "Pendiente",
-    "receipt": null
-  }
-]
+```text
+http://localhost:3000/api
 ```
 
-Regla:
-- mostrar solo obligaciones del mes solicitado,
-- ordenar por vencimiento ascendente.
+## Endpoints
 
----
+- `POST /api/auth/login`
+- `GET /api/auth/me`
+- `GET /api/pagos?year=2026&month=10`
+- `GET /api/pagos/:id`
+- `POST /api/pagos`
+- `PATCH /api/pagos/:id/vencimiento`
+- `POST /api/pagos/:id/registrar-pago`
+- `GET /api/pagos/:id/comprobante`
 
-### Registrar obligación
-
-`POST /api/pagos`
-
-Solo ASISTENTE.
-
-Body:
-
-```json
-{
-  "provider": "Movistar",
-  "concept": "Internet oficina",
-  "category": "Servicios",
-  "amount": 150,
-  "dueDate": "2026-10-22"
-}
-```
-
-Al crearse:
-- estado lógico inicial: Pendiente,
-- NO ejecutar un pago real.
-
----
-
-### Modificar fecha de vencimiento
-
-`PATCH /api/pagos/:id/vencimiento`
-
-Solo ASISTENTE.
-
-Body:
-
-```json
-{
-  "dueDate": "2026-10-25"
-}
-```
-
-Debe persistir en BD.
-
----
-
-### Registrar pago + comprobante
+## Registrar pago
 
 `POST /api/pagos/:id/registrar-pago`
 
-Solo ASISTENTE.
-
-`multipart/form-data`
+Tipo: `multipart/form-data`
 
 Campos:
-- `paidDate`
-- `receipt`
-
-Formatos esperados:
-- PDF
-- JPG / JPEG
-- PNG
-
-Debe:
-1. validar archivo,
-2. almacenar comprobante,
-3. relacionarlo con la obligación,
-4. registrar fecha de pago,
-5. dejar la obligación como Pagada.
-
-Si falla el archivo, NO marcar como Pagada.
-
----
-
-### Obtener un pago
-
-`GET /api/pagos/:id`
-
-GERENTE y ASISTENTE.
-
----
-
-### Ver comprobante
-
-Puede resolverse como:
-
-`GET /api/pagos/:id/comprobante`
-
-o devolver una URL segura dentro del pago.
-
-El GERENTE tiene permiso de lectura, no de modificación.
-
----
-
-## Regla de estado
 
 ```text
-SI existe un pago registrado correctamente:
-    PAGADO
-SINO SI fecha_vencimiento < fecha_actual:
-    VENCIDO
-SINO:
-    PENDIENTE
+paidDate
+metodoPago
+pagadorNombre
+codigoOperacion
+tarjetaMarca
+tarjetaUltimos4
+bancoOrigen
+receipt
 ```
 
-No usar `En proceso`.
+`tarjetaMarca` y `tarjetaUltimos4` solo se usan cuando el método es `TARJETA`.
+`bancoOrigen` solo se usa cuando el método es `TRANSFERENCIA`.
 
-## Permisos
+El archivo `receipt` acepta PDF, JPG/JPEG y PNG hasta 5 MB.
+
+## Roles
 
 ### ASISTENTE
-Puede:
-- crear obligación,
-- cambiar vencimiento,
-- registrar pago,
-- adjuntar comprobante,
-- consultar.
+Puede crear y modificar obligaciones y registrar pagos/comprobantes.
 
 ### GERENTE
-Puede:
-- consultar obligaciones,
-- consultar estados,
-- ver comprobantes.
+Puede consultar obligaciones, estados y comprobantes.
 
-No puede:
-- crear,
-- modificar vencimiento,
-- registrar pago,
-- adjuntar/reemplazar comprobantes.
-
-Ocultar botones en frontend NO es suficiente.
-El backend debe validar el rol.
+Los permisos se validan en backend y en las políticas RLS de Supabase.

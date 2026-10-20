@@ -1,37 +1,25 @@
 # Frontend
 
-Diseño unificado del PMV.
+Interfaz del Sistema Asistente de Pagos conectada al backend real.
 
 ## Incluye
 
-- Menú mínimo: Inicio / Pagos.
-- Vista mensual automática.
-- Navegación mes anterior / siguiente / mes actual.
-- Registro de obligación.
-- Estados Pendiente / Pagado / Vencido.
-- Cambio de fecha de vencimiento.
-- Registro de pago realizado externamente.
+- Login real.
+- Roles Asistente y Gerente.
+- Consulta mensual de obligaciones.
+- Estados Pendiente, Pagado y Vencido.
+- Registro de obligaciones.
+- Modificación de vencimiento mediante calendario.
+- Registro de pago con Yape, tarjeta, transferencia u otro.
 - Carga de comprobante.
-- Vista del comprobante.
-- Diferencias entre Gerente y Asistente.
-- Dashboard simple con Total / Pagado / Pendiente / Vencido.
+- Consulta del comprobante desde Supabase Storage.
 
-## Modo actual
+## Ejecutar
 
-El frontend trabaja con `localStorage` para que el diseño sea totalmente demostrable
-antes de conectar el backend.
+```bash
+python -m http.server 5500
+```
 
-Archivo de integración:
-`js/api.js`
+Abrir `http://localhost:5500`.
 
-## Regla de diseño
-
-No agregar:
-- filtros avanzados,
-- rango de fechas,
-- exportación CSV,
-- importaciones,
-- integraciones,
-- múltiples menús innecesarios.
-
-Cualquier nueva pantalla debe conservar el mismo diseño visual.
+El backend debe estar ejecutándose en `http://localhost:3000`.

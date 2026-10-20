@@ -1,82 +1,127 @@
 # Sistema Asistente de Pagos — PMV
 
-Proyecto base para el Sprint 1 del PMV.
+Sistema web para que un **ASISTENTE** controle las obligaciones de pago del negocio y un **GERENTE** supervise qué debe pagarse, qué ya fue pagado y si el comprobante presentado es válido.
 
-## Estructura
+## Alcance del PMV
 
-```text
-Sistema-Asistente-Pagos/
-├─ frontend/   # Diseño y comportamiento visual ya preparado
-├─ backend/    # Contrato/API esperada para que el equipo implemente la lógica
-└─ bd/         # Esquema SQL inicial compartido
+Este PMV **no incluye una pasarela de pagos ni mueve dinero**. Yape, tarjeta, transferencia, efectivo u otro se registran como el medio por el cual se realizó el pago fuera del sistema. El sistema conserva fecha, monto, código de operación y comprobante.
+
+### ASISTENTE
+- Registrar obligaciones de Servicios, Impuestos, Proveedores y Préstamos.
+- La fecha de vencimiento de una nueva obligación debe ser hoy o una fecha futura y no se modifica después de registrar la obligación.
+- Consultar el mes actual y navegar por meses.
+- Registrar el pago realizado y su medio.
+- Adjuntar comprobante PDF/JPG/JPEG/PNG de máximo 5 MB.
+- Corregir un comprobante cuando el gerente lo rechaza.
+
+### GERENTE
+- Consultar obligaciones y estados.
+- Revisar comprobantes.
+- **Aprobar o rechazar** el comprobante con un motivo.
+- Si rechaza el comprobante, la obligación vuelve automáticamente a Pendiente/Vencido hasta que el asistente la corrija.
+
+## Préstamos
+
+Al elegir `Préstamos` se puede registrar:
+- un solo pago; o
+- un préstamo por cuotas con cronograma automático.
+
+Para cuotas, la tasa indicada se interpreta como **tasa efectiva por periodo de cuota**. Si el contrato establece mora diaria, el sistema calcula dinámicamente:
+
+`mora = monto de la cuota × tasa de mora diaria × días de atraso`
+
+La mora no se guarda como un valor fijo: se recalcula cada vez que se consulta el sistema, por lo que aumenta día a día mientras la cuota siga vencida y sin pago.
+
+## Impuestos
+
+El sistema **no calcula impuestos**. Registra el monto determinado por SUNAT, SAT u otra entidad, además de:
+- tipo de impuesto,
+- periodo tributario (puede corresponder a un mes/año anterior),
+- número de orden/código,
+- recargo informado por la entidad (si existe),
+- vencimiento y comprobante.
+
+## Verificación de comprobantes
+
+El sistema valida automáticamente:
+- formato real del archivo,
+- tamaño máximo,
+- fecha de pago,
+- monto declarado contra el total esperado,
+- campos obligatorios del medio de pago,
+- reutilización del código de operación en otra obligación,
+- Yape: número de operación de exactamente 8 dígitos,
+- Tarjeta: código de autorización de hasta 20 caracteres,
+- Transferencia: referencia de hasta 30 caracteres,
+- Efectivo: referencia opcional de hasta 30 caracteres.
+
+Después, el gerente realiza la verificación humana:
+- `PENDIENTE`
+- `APROBADO`
+- `RECHAZADO`
+
+Los comprobantes rechazados quedan conservados en historial cuando el asistente presenta una corrección.
+
+## Estados de la obligación
+
+- `PAGADO`: existe fecha de pago registrada.
+- `VENCIDO`: no está pagado y la fecha de vencimiento ya pasó.
+- `PENDIENTE`: no está pagado y todavía no venció.
+
+El estado no se selecciona manualmente.
+
+## Base de datos
+
+### Instalación nueva
+Ejecutar en Supabase SQL Editor:
+
+1. `bd/schema.sql`
+2. `bd/storage_policies.sql`
+
+### Si ya tenías la BD anterior
+Ejecutar, en este orden:
+
+1. `bd/2026-10-20_medios_pago.sql` (si aún no lo ejecutaste)
+2. `bd/2026-10-20_validacion_prestamos_impuestos.sql`
+3. `bd/2026-10-20_verificacion_final.sql`
+4. `bd/2026-10-20_reglas_finales_pmv.sql`
+
+## Backend
+
+Crear `backend/.env` a partir de `.env.example` y usar tus propias variables de Supabase.
+
+```bash
+cd backend
+npm install
+npm run dev
 ```
 
-## Objetivo del PMV
+Pruebas:
 
-Permitir que el asistente:
-- registre obligaciones,
-- vea pagos mes a mes,
-- cambie fechas de vencimiento,
-- registre pagos realizados externamente,
-- adjunte comprobantes.
-
-Permitir que el gerente:
-- vea el estado de los pagos,
-- revise comprobantes,
-- consulte el mes actual y otros meses.
-
-## Importante
-
-El frontend funciona actualmente con un modo MOCK usando `localStorage`.
-Esto permite que todo el equipo vea exactamente el mismo diseño antes de conectar el backend.
-
-Cuando el backend esté listo, cambiar en:
-
-`frontend/js/api.js`
-
-```js
-const USE_MOCK_API = true;
+```bash
+npm test
 ```
 
-a:
+## Frontend
 
-```js
-const USE_MOCK_API = false;
-```
-
-y completar las rutas indicadas en `backend/README.md`.
-
-## Ejecutar el frontend
-
-Opción rápida:
-- abrir `frontend/index.html` en el navegador.
-
-Opción recomendada:
 ```bash
 cd frontend
-python -m http.server 5500
+py -m http.server 5500
 ```
 
-Luego abrir:
-`http://localhost:5500`
+Abrir `http://localhost:5500`.
 
-## Roles de demostración
+## Validación funcional
 
-Al abrir por primera vez se puede elegir:
-- Asistente
-- Gerente
+Revisar `VALIDAR_CAMBIOS.md` para probar el flujo completo como Asistente y Gerente.
 
-El selector de perfil solo existe para facilitar la demo mientras no haya autenticación real.
 
-## Alcance del Sprint 1
+## Flujo final de verificación de pagos
 
-Incluye:
-- HU01 Registrar obligación
-- HU02 Visualizar pagos del mes
-- HU03 Modificar fecha de vencimiento
-- HU04 Registrar pago y comprobante
-- HU05 Consultar estado de pagos
-- HU06 Revisar comprobantes
-- TT01 Roles Gerente / Asistente
+El asistente registra el medio, monto, fecha declarada, código de operación y comprobante. Esto NO marca todavía la obligación como pagada. El gerente revisa el comprobante: al aprobarlo, se confirma `fecha_pago` y la obligación pasa a PAGADO; al rechazarlo, continúa PENDIENTE o VENCIDA y queda habilitada la corrección con historial.
 
-No incluye pagos reales ni integraciones bancarias.
+Para bases ya migradas, ejecuta también `bd/2026-10-20_reglas_finales_pmv.sql`. Para reiniciar datos de prueba usa `bd/RESET_DATOS_PRUEBA.sql`.
+
+
+## Límite de montos
+Los importes del PMV aceptan desde S/ 0.01 hasta S/ 9,999,999,999.99 y máximo dos decimales. Para una base ya creada, ejecutar `bd/2026-10-20_limites_montos.sql` una sola vez.
