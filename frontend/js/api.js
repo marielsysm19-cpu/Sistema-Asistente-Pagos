@@ -1,4 +1,23 @@
-const API_BASE_URL = "http://localhost:3000/api";
+// URL del backend en producción (Render).
+// Cuando despliegues tu backend en Render, copia su URL y colócala aquí terminada en "/api"
+// Ejemplo: "https://sistema-asistente-pagos-backend.onrender.com/api"
+const PROD_API_URL = "https://TU-BACKEND.onrender.com/api";
+
+const isLocalhost = Boolean(
+  window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1" ||
+  window.location.hostname === ""
+);
+
+const API_BASE_URL = isLocalhost
+  ? "http://localhost:3000/api"
+  : (localStorage.getItem("sap_api_url") || window.__API_BASE_URL__ || PROD_API_URL);
+
+if (!isLocalhost && API_BASE_URL.includes("TU-BACKEND")) {
+  console.warn(
+    "⚠️ SAP: Recuerda configurar tu URL de backend en frontend/js/api.js (variable PROD_API_URL) o ejecuta en consola: localStorage.setItem('sap_api_url', 'https://tu-backend.onrender.com/api')"
+  );
+}
 
 const TOKEN_KEY = "sap_access_token";
 const USER_KEY = "sap_usuario";
